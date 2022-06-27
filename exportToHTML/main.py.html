@@ -1,0 +1,274 @@
+<html>
+<head>
+<title>main.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #808080;}
+.s3 { color: #6897bb;}
+.s4 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+main.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">pygame</span>
+<span class="s0">import </span><span class="s1">sys</span>
+<span class="s0">import </span><span class="s1">random</span>
+<span class="s0">from </span><span class="s1">words </span><span class="s0">import </span><span class="s1">*</span>
+
+<span class="s1">pygame.init()</span>
+
+<span class="s2"># Constants</span>
+
+<span class="s1">WIDTH</span><span class="s0">, </span><span class="s1">HEIGHT = </span><span class="s3">633</span><span class="s0">, </span><span class="s3">900</span>
+
+<span class="s1">SCREEN = pygame.display.set_mode((WIDTH</span><span class="s0">, </span><span class="s1">HEIGHT))</span>
+<span class="s1">BACKGROUND = pygame.image.load(</span><span class="s4">&quot;assets/Starting Tiles.png&quot;</span><span class="s1">)</span>
+<span class="s1">BACKGROUND_RECT = BACKGROUND.get_rect(center=(</span><span class="s3">317</span><span class="s0">, </span><span class="s3">300</span><span class="s1">))</span>
+<span class="s1">ICON = pygame.image.load(</span><span class="s4">&quot;assets/Icon.png&quot;</span><span class="s1">)</span>
+
+<span class="s1">pygame.display.set_caption(</span><span class="s4">&quot;Wordle With Definitions&quot;</span><span class="s1">)</span>
+<span class="s1">pygame.display.set_icon(ICON)</span>
+
+<span class="s1">GREEN = </span><span class="s4">&quot;#6aaa64&quot;</span>
+<span class="s1">YELLOW = </span><span class="s4">&quot;#c9b458&quot;</span>
+<span class="s1">GREY = </span><span class="s4">&quot;#787c7e&quot;</span>
+<span class="s1">OUTLINE = </span><span class="s4">&quot;#d3d6da&quot;</span>
+<span class="s1">BLUE = </span><span class="s4">&quot;#0c2340&quot;</span>
+<span class="s1">FILLED_OUTLINE = </span><span class="s4">&quot;#878a8c&quot;</span>
+
+<span class="s1">CORRECT_WORD = random.choice(WORDS)</span>
+
+<span class="s1">ALPHABET = [</span><span class="s4">&quot;QWERTYUIOP&quot;</span><span class="s0">, </span><span class="s4">&quot;ASDFGHJKL&quot;</span><span class="s0">, </span><span class="s4">&quot;ZXCVBNM&quot;</span><span class="s1">]</span>
+
+<span class="s1">GUESSED_LETTER_FONT = pygame.font.Font(</span><span class="s4">&quot;assets/FreeSansBold.otf&quot;</span><span class="s0">, </span><span class="s3">50</span><span class="s1">)</span>
+<span class="s1">AVAILABLE_LETTER_FONT = pygame.font.Font(</span><span class="s4">&quot;assets/FreeSansBold.otf&quot;</span><span class="s0">, </span><span class="s3">25</span><span class="s1">)</span>
+
+<span class="s1">SCREEN.fill(</span><span class="s4">&quot;white&quot;</span><span class="s1">)</span>
+<span class="s1">SCREEN.blit(BACKGROUND</span><span class="s0">, </span><span class="s1">BACKGROUND_RECT)</span>
+<span class="s1">pygame.display.update()</span>
+
+<span class="s1">LETTER_X_SPACING = </span><span class="s3">85</span>
+<span class="s1">LETTER_Y_SPACING = </span><span class="s3">12</span>
+<span class="s1">LETTER_SIZE = </span><span class="s3">75</span>
+
+<span class="s2"># Global variables</span>
+
+<span class="s1">guesses_count = </span><span class="s3">0</span>
+
+<span class="s2"># guesses is a 2D list that will store guesses. A guess will be a list of letters.</span>
+<span class="s2"># The list will be iterated through and each letter in each guess will be drawn on the screen.</span>
+<span class="s1">guesses = [[]] * </span><span class="s3">6</span>
+
+<span class="s1">current_guess = []</span>
+<span class="s1">current_guess_string = </span><span class="s4">&quot;&quot;</span>
+<span class="s1">current_letter_bg_x = </span><span class="s3">110</span>
+
+<span class="s2"># Indicators is a list storing all the Indicator object. An indicator is that button thing with all the letters you see.</span>
+<span class="s1">indicators = []</span>
+
+<span class="s1">game_result = </span><span class="s4">&quot;&quot;</span>
+
+
+<span class="s0">class </span><span class="s1">Letter:</span>
+    <span class="s0">def </span><span class="s1">__init__(self</span><span class="s0">, </span><span class="s1">text</span><span class="s0">, </span><span class="s1">bg_position):</span>
+        <span class="s2"># Initializes all the variables, including text, color, position, size, etc.</span>
+        <span class="s1">self.bg_color = </span><span class="s4">&quot;white&quot;</span>
+        <span class="s1">self.text_color = </span><span class="s4">&quot;black&quot;</span>
+        <span class="s1">self.bg_position = bg_position</span>
+        <span class="s1">self.bg_x = bg_position[</span><span class="s3">0</span><span class="s1">]</span>
+        <span class="s1">self.bg_y = bg_position[</span><span class="s3">1</span><span class="s1">]</span>
+        <span class="s1">self.bg_rect = (bg_position[</span><span class="s3">0</span><span class="s1">]</span><span class="s0">, </span><span class="s1">self.bg_y</span><span class="s0">, </span><span class="s1">LETTER_SIZE</span><span class="s0">, </span><span class="s1">LETTER_SIZE)</span>
+        <span class="s1">self.text = text</span>
+        <span class="s1">self.text_position = (self.bg_x + </span><span class="s3">36</span><span class="s0">, </span><span class="s1">self.bg_position[</span><span class="s3">1</span><span class="s1">] + </span><span class="s3">34</span><span class="s1">)</span>
+        <span class="s1">self.text_surface = GUESSED_LETTER_FONT.render(self.text</span><span class="s0">, True, </span><span class="s1">self.text_color)</span>
+        <span class="s1">self.text_rect = self.text_surface.get_rect(center=self.text_position)</span>
+
+    <span class="s0">def </span><span class="s1">draw(self):</span>
+        <span class="s2"># Puts the letter and text on the screen at the desired positions.</span>
+        <span class="s1">pygame.draw.rect(SCREEN</span><span class="s0">, </span><span class="s1">self.bg_color</span><span class="s0">, </span><span class="s1">self.bg_rect)</span>
+        <span class="s0">if </span><span class="s1">self.bg_color == </span><span class="s4">&quot;white&quot;</span><span class="s1">:</span>
+            <span class="s1">pygame.draw.rect(SCREEN</span><span class="s0">, </span><span class="s1">FILLED_OUTLINE</span><span class="s0">, </span><span class="s1">self.bg_rect</span><span class="s0">, </span><span class="s3">3</span><span class="s1">)</span>
+        <span class="s1">self.text_surface = GUESSED_LETTER_FONT.render(self.text</span><span class="s0">, True, </span><span class="s1">self.text_color)</span>
+        <span class="s1">SCREEN.blit(self.text_surface</span><span class="s0">, </span><span class="s1">self.text_rect)</span>
+        <span class="s1">pygame.display.update()</span>
+
+    <span class="s0">def </span><span class="s1">delete(self):</span>
+        <span class="s2"># Fills the letter's spot with the default square, emptying it.</span>
+        <span class="s1">pygame.draw.rect(SCREEN</span><span class="s0">, </span><span class="s4">&quot;white&quot;</span><span class="s0">, </span><span class="s1">self.bg_rect)</span>
+        <span class="s1">pygame.draw.rect(SCREEN</span><span class="s0">, </span><span class="s1">OUTLINE</span><span class="s0">, </span><span class="s1">self.bg_rect</span><span class="s0">, </span><span class="s3">3</span><span class="s1">)</span>
+        <span class="s1">pygame.display.update()</span>
+
+
+<span class="s0">class </span><span class="s1">Indicator:</span>
+    <span class="s0">def </span><span class="s1">__init__(self</span><span class="s0">, </span><span class="s1">x</span><span class="s0">, </span><span class="s1">y</span><span class="s0">, </span><span class="s1">letter):</span>
+        <span class="s2"># Initializes variables such as color, size, position, and letter.</span>
+        <span class="s1">self.x = x</span>
+        <span class="s1">self.y = y</span>
+        <span class="s1">self.text = letter</span>
+        <span class="s1">self.rect = (self.x</span><span class="s0">, </span><span class="s1">self.y</span><span class="s0">, </span><span class="s3">57</span><span class="s0">, </span><span class="s3">75</span><span class="s1">)</span>
+        <span class="s1">self.bg_color = OUTLINE</span>
+
+    <span class="s0">def </span><span class="s1">draw(self):</span>
+        <span class="s2"># Puts the indicator and its text on the screen at the desired position.</span>
+        <span class="s1">pygame.draw.rect(SCREEN</span><span class="s0">, </span><span class="s1">self.bg_color</span><span class="s0">, </span><span class="s1">self.rect)</span>
+        <span class="s1">self.text_surface = AVAILABLE_LETTER_FONT.render(self.text</span><span class="s0">, True, </span><span class="s4">&quot;white&quot;</span><span class="s1">)</span>
+        <span class="s1">self.text_rect = self.text_surface.get_rect(center=(self.x + </span><span class="s3">27</span><span class="s0">, </span><span class="s1">self.y + </span><span class="s3">30</span><span class="s1">))</span>
+        <span class="s1">SCREEN.blit(self.text_surface</span><span class="s0">, </span><span class="s1">self.text_rect)</span>
+        <span class="s1">pygame.display.update()</span>
+
+
+<span class="s2"># Drawing the indicators on the screen.</span>
+
+<span class="s1">indicator_x</span><span class="s0">, </span><span class="s1">indicator_y = </span><span class="s3">20</span><span class="s0">, </span><span class="s3">600</span>
+
+<span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(</span><span class="s3">3</span><span class="s1">):</span>
+    <span class="s0">for </span><span class="s1">letter </span><span class="s0">in </span><span class="s1">ALPHABET[i]:</span>
+        <span class="s1">new_indicator = Indicator(indicator_x</span><span class="s0">, </span><span class="s1">indicator_y</span><span class="s0">, </span><span class="s1">letter)</span>
+        <span class="s1">indicators.append(new_indicator)</span>
+        <span class="s1">new_indicator.draw()</span>
+        <span class="s1">indicator_x += </span><span class="s3">60</span>
+    <span class="s1">indicator_y += </span><span class="s3">100</span>
+    <span class="s0">if </span><span class="s1">i == </span><span class="s3">0</span><span class="s1">:</span>
+        <span class="s1">indicator_x = </span><span class="s3">50</span>
+    <span class="s0">elif </span><span class="s1">i == </span><span class="s3">1</span><span class="s1">:</span>
+        <span class="s1">indicator_x = </span><span class="s3">105</span>
+
+
+<span class="s0">def </span><span class="s1">check_guess(guess_to_check):</span>
+    <span class="s2"># Goes through each letter and checks if it should be green, yellow, or grey.</span>
+    <span class="s0">global </span><span class="s1">current_guess</span><span class="s0">, </span><span class="s1">current_guess_string</span><span class="s0">, </span><span class="s1">guesses_count</span><span class="s0">, </span><span class="s1">current_letter_bg_x</span><span class="s0">, </span><span class="s1">game_result</span>
+    <span class="s1">game_decided = </span><span class="s0">False</span>
+    <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(</span><span class="s3">5</span><span class="s1">):</span>
+        <span class="s1">lowercase_letter = guess_to_check[i].text.lower()</span>
+        <span class="s0">if </span><span class="s1">lowercase_letter </span><span class="s0">in </span><span class="s1">CORRECT_WORD:</span>
+            <span class="s0">if </span><span class="s1">lowercase_letter == CORRECT_WORD[i]:</span>
+                <span class="s1">guess_to_check[i].bg_color = GREEN</span>
+                <span class="s0">for </span><span class="s1">indicator </span><span class="s0">in </span><span class="s1">indicators:</span>
+                    <span class="s0">if </span><span class="s1">indicator.text == lowercase_letter.upper():</span>
+                        <span class="s1">indicator.bg_color = GREEN</span>
+                        <span class="s1">indicator.draw()</span>
+                <span class="s1">guess_to_check[i].text_color = </span><span class="s4">&quot;white&quot;</span>
+                <span class="s0">if not </span><span class="s1">game_decided:</span>
+                    <span class="s1">game_result = </span><span class="s4">&quot;W&quot;</span>
+            <span class="s0">else</span><span class="s1">:</span>
+                <span class="s1">guess_to_check[i].bg_color = YELLOW</span>
+                <span class="s0">for </span><span class="s1">indicator </span><span class="s0">in </span><span class="s1">indicators:</span>
+                    <span class="s0">if </span><span class="s1">indicator.text == lowercase_letter.upper():</span>
+                        <span class="s1">indicator.bg_color = YELLOW</span>
+                        <span class="s1">indicator.draw()</span>
+                <span class="s1">guess_to_check[i].text_color = </span><span class="s4">&quot;white&quot;</span>
+                <span class="s1">game_result = </span><span class="s4">&quot;&quot;</span>
+                <span class="s1">game_decided = </span><span class="s0">True</span>
+        <span class="s0">else</span><span class="s1">:</span>
+            <span class="s1">guess_to_check[i].bg_color = GREY</span>
+            <span class="s0">for </span><span class="s1">indicator </span><span class="s0">in </span><span class="s1">indicators:</span>
+                <span class="s0">if </span><span class="s1">indicator.text == lowercase_letter.upper():</span>
+                    <span class="s1">indicator.bg_color = GREY</span>
+                    <span class="s1">indicator.draw()</span>
+            <span class="s1">guess_to_check[i].text_color = </span><span class="s4">&quot;white&quot;</span>
+            <span class="s1">game_result = </span><span class="s4">&quot;&quot;</span>
+            <span class="s1">game_decided = </span><span class="s0">True</span>
+        <span class="s1">guess_to_check[i].draw()</span>
+        <span class="s1">pygame.display.update()</span>
+
+    <span class="s1">guesses_count += </span><span class="s3">1</span>
+    <span class="s1">current_guess = []</span>
+    <span class="s1">current_guess_string = </span><span class="s4">&quot;&quot;</span>
+    <span class="s1">current_letter_bg_x = </span><span class="s3">110</span>
+
+    <span class="s0">if </span><span class="s1">guesses_count == </span><span class="s3">6 </span><span class="s0">and </span><span class="s1">game_result == </span><span class="s4">&quot;&quot;</span><span class="s1">:</span>
+        <span class="s1">game_result = </span><span class="s4">&quot;L&quot;</span>
+
+
+<span class="s0">def </span><span class="s1">play_again():</span>
+    <span class="s2"># Puts the play again text on the screen.</span>
+    <span class="s1">pygame.draw.rect(SCREEN</span><span class="s0">, </span><span class="s4">&quot;white&quot;</span><span class="s0">, </span><span class="s1">(</span><span class="s3">10</span><span class="s0">, </span><span class="s3">600</span><span class="s0">, </span><span class="s3">1000</span><span class="s0">, </span><span class="s3">600</span><span class="s1">))</span>
+    <span class="s1">play_again_font = pygame.font.Font(</span><span class="s4">&quot;assets/FreeSansBold.otf&quot;</span><span class="s0">, </span><span class="s3">40</span><span class="s1">)</span>
+
+    <span class="s1">play_again_text = play_again_font.render(</span><span class="s4">&quot;Press ENTER to Play Again!&quot;</span><span class="s0">, True, </span><span class="s4">&quot;black&quot;</span><span class="s1">)</span>
+    <span class="s1">play_again_rect = play_again_text.get_rect(center=(WIDTH / </span><span class="s3">2</span><span class="s0">, </span><span class="s3">700</span><span class="s1">))</span>
+
+    <span class="s1">word_was_text = play_again_font.render(</span><span class="s4">f&quot;The word was </span><span class="s0">{</span><span class="s1">CORRECT_WORD</span><span class="s0">}</span><span class="s4">!&quot;</span><span class="s0">, True, </span><span class="s4">&quot;black&quot;</span><span class="s1">)</span>
+    <span class="s1">word_was_rect = word_was_text.get_rect(center=(WIDTH / </span><span class="s3">2</span><span class="s0">, </span><span class="s3">650</span><span class="s1">))</span>
+
+    <span class="s1">lte_redirect_font = pygame.font.Font(</span><span class="s4">&quot;assets/FreeSansBold.otf&quot;</span><span class="s0">, </span><span class="s3">15</span><span class="s1">)</span>
+    <span class="s1">lte_redirect_text = lte_redirect_font.render(</span><span class="s4">&quot;Please Click This Link To Donate: https://libthrougheducation.org/&quot;</span><span class="s0">, True, </span><span class="s4">&quot;black&quot;</span><span class="s1">)</span>
+    <span class="s1">lte_redirect_rect = lte_redirect_text.get_rect(center=(WIDTH / </span><span class="s3">2</span><span class="s0">, </span><span class="s3">850</span><span class="s1">))</span>
+
+    <span class="s1">SCREEN.blit(word_was_text</span><span class="s0">, </span><span class="s1">word_was_rect)</span>
+    <span class="s1">SCREEN.blit(play_again_text</span><span class="s0">, </span><span class="s1">play_again_rect)</span>
+    <span class="s1">SCREEN.blit(lte_redirect_text</span><span class="s0">, </span><span class="s1">lte_redirect_rect)</span>
+
+    <span class="s1">pygame.display.update()</span>
+
+
+<span class="s0">def </span><span class="s1">reset():</span>
+    <span class="s2"># Resets all global variables to their default states.</span>
+    <span class="s0">global </span><span class="s1">guesses_count</span><span class="s0">, </span><span class="s1">CORRECT_WORD</span><span class="s0">, </span><span class="s1">guesses</span><span class="s0">, </span><span class="s1">current_guess</span><span class="s0">, </span><span class="s1">current_guess_string</span><span class="s0">, </span><span class="s1">game_result</span>
+    <span class="s1">SCREEN.fill(</span><span class="s4">&quot;white&quot;</span><span class="s1">)</span>
+    <span class="s1">SCREEN.blit(BACKGROUND</span><span class="s0">, </span><span class="s1">BACKGROUND_RECT)</span>
+    <span class="s1">guesses_count = </span><span class="s3">0</span>
+    <span class="s1">CORRECT_WORD = random.choice(WORDS)</span>
+    <span class="s1">guesses = [[]] * </span><span class="s3">6</span>
+    <span class="s1">current_guess = []</span>
+    <span class="s1">current_guess_string = </span><span class="s4">&quot;&quot;</span>
+    <span class="s1">game_result = </span><span class="s4">&quot;&quot;</span>
+    <span class="s1">pygame.display.update()</span>
+    <span class="s0">for </span><span class="s1">indicator </span><span class="s0">in </span><span class="s1">indicators:</span>
+        <span class="s1">indicator.bg_color = OUTLINE</span>
+        <span class="s1">indicator.draw()</span>
+
+
+<span class="s0">def </span><span class="s1">create_new_letter():</span>
+    <span class="s2"># Creates a new letter and adds it to the guess.</span>
+    <span class="s0">global </span><span class="s1">current_guess_string</span><span class="s0">, </span><span class="s1">current_letter_bg_x</span>
+    <span class="s1">current_guess_string += key_pressed</span>
+    <span class="s1">new_letter = Letter(key_pressed</span><span class="s0">, </span><span class="s1">(current_letter_bg_x</span><span class="s0">, </span><span class="s1">guesses_count * </span><span class="s3">100 </span><span class="s1">+ LETTER_Y_SPACING))</span>
+    <span class="s1">current_letter_bg_x += LETTER_X_SPACING</span>
+    <span class="s1">guesses[guesses_count].append(new_letter)</span>
+    <span class="s1">current_guess.append(new_letter)</span>
+    <span class="s0">for </span><span class="s1">guess </span><span class="s0">in </span><span class="s1">guesses:</span>
+        <span class="s0">for </span><span class="s1">letter </span><span class="s0">in </span><span class="s1">guess:</span>
+            <span class="s1">letter.draw()</span>
+
+
+<span class="s0">def </span><span class="s1">delete_letter():</span>
+    <span class="s2"># Deletes the last letter from the guess.</span>
+    <span class="s0">global </span><span class="s1">current_guess_string</span><span class="s0">, </span><span class="s1">current_letter_bg_x</span>
+    <span class="s1">guesses[guesses_count][-</span><span class="s3">1</span><span class="s1">].delete()</span>
+    <span class="s1">guesses[guesses_count].pop()</span>
+    <span class="s1">current_guess_string = current_guess_string[:-</span><span class="s3">1</span><span class="s1">]</span>
+    <span class="s1">current_guess.pop()</span>
+    <span class="s1">current_letter_bg_x -= LETTER_X_SPACING</span>
+
+
+<span class="s0">while True</span><span class="s1">:</span>
+    <span class="s0">if </span><span class="s1">game_result != </span><span class="s4">&quot;&quot;</span><span class="s1">:</span>
+        <span class="s1">play_again()</span>
+    <span class="s0">for </span><span class="s1">event </span><span class="s0">in </span><span class="s1">pygame.event.get():</span>
+        <span class="s0">if </span><span class="s1">event.type == pygame.QUIT:</span>
+            <span class="s1">pygame.quit()</span>
+            <span class="s1">sys.exit()</span>
+        <span class="s0">if </span><span class="s1">event.type == pygame.KEYDOWN:</span>
+            <span class="s0">if </span><span class="s1">event.key == pygame.K_RETURN:</span>
+                <span class="s0">if </span><span class="s1">game_result != </span><span class="s4">&quot;&quot;</span><span class="s1">:</span>
+                    <span class="s1">reset()</span>
+                <span class="s0">else</span><span class="s1">:</span>
+                    <span class="s0">if </span><span class="s1">len(current_guess_string) == </span><span class="s3">5 </span><span class="s0">and </span><span class="s1">current_guess_string.lower() </span><span class="s0">in </span><span class="s1">WORDS:</span>
+                        <span class="s1">check_guess(current_guess)</span>
+            <span class="s0">elif </span><span class="s1">event.key == pygame.K_BACKSPACE:</span>
+                <span class="s0">if </span><span class="s1">len(current_guess_string) &gt; </span><span class="s3">0</span><span class="s1">:</span>
+                    <span class="s1">delete_letter()</span>
+            <span class="s0">else</span><span class="s1">:</span>
+                <span class="s1">key_pressed = event.unicode.upper()</span>
+                <span class="s0">if </span><span class="s1">key_pressed </span><span class="s0">in </span><span class="s4">&quot;QWERTYUIOPASDFGHJKLZXCVBNM&quot; </span><span class="s0">and </span><span class="s1">key_pressed != </span><span class="s4">&quot;&quot;</span><span class="s1">:</span>
+                    <span class="s0">if </span><span class="s1">len(current_guess_string) &lt; </span><span class="s3">5</span><span class="s1">:</span>
+                        <span class="s1">create_new_letter()</span></pre>
+</body>
+</html>
